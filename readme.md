@@ -1,6 +1,8 @@
 es6-deps
 -------
 
+A simple util to get dependency list of a es6/jsx file.
+
 Install
 -----
 
