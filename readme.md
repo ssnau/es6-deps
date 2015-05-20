@@ -13,9 +13,12 @@ npm install es6-deps
 Example
 -----
 
-Input the absolute path of your entry file and it will ouput a list of its dependencies for the provided callback.
+Suppose you have 2 files, one is `a.js` with content:
 
-Suppose you have 2 files, one is `a.js` while another is `b.js`. The content of  `a.js` is: `var b = require('b')` while `b.js` is empty.
+```
+var b = require('b')
+```
+another is `b.js` whose content is empty. Below is how we get the dependencies list of `a.js`:
 
 ```
 var deps = require('es6-deps');
