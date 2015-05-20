@@ -25,8 +25,3 @@ function go(cfg, cb) {
   }
 };
 module.exports = go;
-/*
-go(__dirname+"/test/files/error.js", function (err, data) {
-  console.log('err is :', err);
-});
-*/
