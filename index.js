@@ -29,6 +29,12 @@ function suffix_path(p) {
     }
 }
 
+function safe(fn) {
+    try {
+        fn();
+    } catch (e) {}
+}
+
 function _resolve(current, relpath) {
     var dirname = path.dirname(current);
     var nmdir;
@@ -50,7 +56,10 @@ function _resolve(current, relpath) {
 
     if (!nmdir) throw new Error('cannot parse ' + relpath + ' when processing ' + current);
     if (!isdir(nmdir)) return nmdir;
-    var pkg = require(path.join(nmdir, 'package.json'));
+    var pkg = {};
+    safe(function (__) {
+        return pkg = require(path.join(nmdir, 'package.json'));
+    });
     var main = pkg.main || "index";
     return path.join(nmdir, main);
 }
