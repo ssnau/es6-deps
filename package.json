@@ -17,7 +17,8 @@
     "through2": "^2.0.0"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "build": "babel src/index.js --out-file index.js"
   },
   "repository": {
     "type": "git",

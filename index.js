@@ -1,3 +1,13 @@
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
 var isdir = require('isdir');
 var fs = require('fs');
 var path = require('path');
@@ -5,12 +15,7 @@ var strip = require('strip-comments');
 
 var builtin = require('builtin-modules');
 
-var regs = [
-    /import\s+.*"([^"]+)"/,
-    /import\s+.*'([^']+)'/,
-    /require\s*\("([^"]*)"\)/,
-    /require\s*\('([^']*)'\)/,
-];
+var regs = [/import\s+.*"([^"]+)"/, /import\s+.*'([^']+)'/, /require\s*\("([^"]*)"\)/, /require\s*\('([^']*)'\)/];
 
 var cache = {};
 
@@ -27,7 +32,7 @@ function _resolve(current, relpath) {
             nmdir = path.join(p, 'node_modules');
             break;
         }
-        parts.pop(); 
+        parts.pop();
     }
     if (!nmdir) throw new Error('cannot find node_modules from ', current, ' when requiring ', relpath);
 
@@ -41,56 +46,89 @@ function _resolve(current, relpath) {
 function resolve(current, filepath) {
     var p = _resolve(current, filepath);
     var pt;
-    for (let suffix of ['', '.js', '.jsx', '.es6']) {
+    var _arr = ['', '.js', '.jsx', '.es6'];
+    for (var _i = 0; _i < _arr.length; _i++) {
+        var suffix = _arr[_i];
         var pt = p + suffix;
         if (fs.existsSync(pt)) return pt;
     }
     throw new Error(p + " not exist when processing " + current + " and requiring " + filepath);
 }
 
-export default class {
-    constructor() {
+var _default = (function () {
+    function _default() {
+        _classCallCheck(this, _default);
+
         this.cache = {};
     }
 
-    clearCache() {
-        this.cache = {};
-    }
+    _createClass(_default, [{
+        key: 'clearCache',
+        value: function clearCache() {
+            this.cache = {};
+        }
+    }, {
+        key: 'getDeps',
+        value: function getDeps(filepath, content, opt) {
+            opt = opt || {};
+            var ignoreBuiltin = opt.ignoreBuiltin;
+            var status = {};
+            var cache = this.cache;
+            status[filepath] = true;
 
-    getDeps(filepath, content, opt) {
-        opt = opt || {};
-        const ignoreBuiltin = opt.ignoreBuiltin;
-        var status = {};
-        var cache = this.cache;
-        status[filepath] = true;
+            function _get(content, filepath) {
+                var deps = [];
+                strip(content).split('\n').filter(function (line) {
+                    return line.indexOf('require') > -1 || line.indexOf('import') > -1;
+                }).forEach(function (line) {
+                    var _iteratorNormalCompletion = true;
+                    var _didIteratorError = false;
+                    var _iteratorError = undefined;
 
-        function _get(content, filepath) {
-            var deps = [];
-            strip(content)
-                .split('\n')
-                .filter(line => line.indexOf('require') > -1 || line.indexOf('import') > -1)
-                .forEach(function(line) {
-                    for (let reg of regs) {
-                        let match = line.match(reg); 
-                        if (match && match[1]) {
-                            if (builtin.indexOf(match[1]) > -1) {
-                                !ignoreBuiltin && deps.push(match[1]);
-                            } else {
-                                let name = resolve(filepath, match[1]);
-                                if (!fs.existsSync(name)) {
-                                    throw new Error(name + ' not exist when processing ' + filepath + ' and requring ' + match[1]);
+                    try {
+                        for (var _iterator = regs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                            var reg = _step.value;
+
+                            var match = line.match(reg);
+                            if (match && match[1]) {
+                                if (builtin.indexOf(match[1]) > -1) {
+                                    !ignoreBuiltin && deps.push(match[1]);
+                                } else {
+                                    var _name = resolve(filepath, match[1]);
+                                    if (!fs.existsSync(_name)) {
+                                        throw new Error(_name + ' not exist when processing ' + filepath + ' and requring ' + match[1]);
+                                    }
+                                    if (status[_name]) return; // cyclic, and ignore
+                                    status[_name] = true;
+                                    if (!cache[_name]) cache[_name] = _get(fs.readFileSync(_name, 'utf-8'), _name);
+                                    deps.push.apply(deps, cache[_name].concat(_name));
                                 }
-                                if (status[name]) return; // cyclic, and ignore
-                                status[name] = true;
-                                if (!cache[name]) cache[name] = _get(fs.readFileSync(name, 'utf-8'), name);
-                                deps.push.apply(deps, cache[name].concat(name));
+                            }
+                        }
+                    } catch (err) {
+                        _didIteratorError = true;
+                        _iteratorError = err;
+                    } finally {
+                        try {
+                            if (!_iteratorNormalCompletion && _iterator['return']) {
+                                _iterator['return']();
+                            }
+                        } finally {
+                            if (_didIteratorError) {
+                                throw _iteratorError;
                             }
                         }
                     }
                 });
-            return deps;
+                return deps;
+            }
+            content = content || fs.readFileSync(filepath, 'utf-8');
+            return _get(content, filepath);
         }
-        content = content || fs.readFileSync(filepath, 'utf-8');
-        return _get(content, filepath);
-    }
-}
+    }]);
+
+    return _default;
+})();
+
+exports['default'] = _default;
+module.exports = exports['default'];
