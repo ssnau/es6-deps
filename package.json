@@ -7,13 +7,14 @@
     "test": "mocha"
   },
   "dependencies": {
-    "browserify": "^10.2.1",
-    "module-deps": "^3.7.13",
-    "babelify": "^6.1.1",
-    "through2": "^0.6.5"
+    "builtin-modules": "^1.1.0",
+    "isdir": "^2.0.1",
+    "strip-comments": "^0.3.2"
   },
   "devDependencies": {
-    "mocha": "^2.2.5"
+    "babel": "^5.8.23",
+    "mocha": "^2.2.5",
+    "through2": "^2.0.0"
   },
   "scripts": {
     "test": "mocha"

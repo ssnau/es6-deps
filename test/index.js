@@ -1,3 +1,4 @@
+require('babel/register');
 var assert = require('assert');
 var deps = require('../');
 var file = function (name) {
@@ -5,42 +6,32 @@ var file = function (name) {
 }
 
 describe('should get deps', function () {
-  this.timeout(20*1000);
 
-  it('basic', function(done) {
-    deps(file('simple.js'), function(err, data) {
-      assert.ok(Array.isArray(data));
-      assert.ok(data.length > 3);
-      done();
-    });
+  it('basic', function() {
+    var data = deps(file('simple.js'));
+    assert.ok(Array.isArray(data));
+    assert.ok(data.length > 3);
   });
 
-  it('require b', function (done) {
-    deps(file('r-b.js'), function (err, data) {
-      assert.equal(data.length, 2);
-      assert.deepEqual([
-        file('b.js'),
-        file('r-b.js')
-        ], data);
-      done();
-    });
+  it('require b', function () {
+    var data = deps(file('r-b.js'));
+    assert.equal(data.length, 1);
+    assert.deepEqual([
+      file('b.js'),
+    ], data);
   });
-  it('import b', function (done) {
-    deps(file('i-b.js'), function (err, data) {
-      assert.equal(data.length, 2);
-      assert.deepEqual([
-        file('b.js'),
-        file('i-b.js')
-        ], data);
-      done();
-    });
+  it('import b', function () {
+    var data = deps(file('i-b.js'));
+    assert.equal(data.length, 1);
+    assert.deepEqual([
+      file('b.js'),
+    ], data);
   });
 
-  it('parse error', function (done) {
-    deps(file('error.js'), function (err, data) {
-      console.log('called me');
-      done();
-    });
+  it('parse error', function () {
+      assert.throws(function(){
+        var data = deps(file('error.js'));
+      });
   });
 
 });
