@@ -1,11 +1,16 @@
 require('babel/register');
 var assert = require('assert');
-var deps = require('../');
+var Dep = require('../');
 var file = function (name) {
   return __dirname + "/files/" + name;
 }
+var dep = new Dep();
+var deps = dep.getDeps.bind(dep);
 
 describe('should get deps', function () {
+   before(function() {
+        dep.clearCache();
+   });
 
   it('basic', function() {
     var data = deps(file('simple.js'));

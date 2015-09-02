@@ -12,6 +12,8 @@ var regs = [
     /require\s*\('([^']*)'\)/,
 ];
 
+var cache = {};
+
 function _resolve(current, relpath) {
     var dirname = path.dirname(current);
     if (relpath.charAt(0) === '/') return relpath;
@@ -46,38 +48,49 @@ function resolve(current, filepath) {
     throw new Error(p + " not exist when processing " + current + " and requiring " + filepath);
 }
 
-function getDeps(filepath, content, opt) {
-    opt = opt || {};
-    const ignoreBuiltin = opt.ignoreBuiltin;
-    var status = {};
-    status[filepath] = true;
+export default class {
+    constructor() {
+        this.cache = {};
+    }
 
-    function _get(content, filepath) {
-        var deps = [];
-        strip(content)
-            .split('\n')
-            .filter(line => line.indexOf('require') > -1 || line.indexOf('import') > -1)
-            .forEach(function(line) {
-                for (let reg of regs) {
-                    let match = line.match(reg); 
-                    if (match && match[1]) {
-                        if (builtin.indexOf(match[1]) > -1) {
-                            !ignoreBuiltin && deps.push(match[1]);
-                        } else {
-                            let name = resolve(filepath, match[1]);
-                            if (!fs.existsSync(name)) {
-                                throw new Error(name + ' not exist when processing ' + filepath + ' and requring ' + match[1]);
+    clearCache() {
+        this.cache = {};
+    }
+
+    getDeps(filepath, content, opt) {
+        opt = opt || {};
+        const ignoreBuiltin = opt.ignoreBuiltin;
+        var status = {};
+        var cache = this.cache;
+        status[filepath] = true;
+
+        function _get(content, filepath) {
+            var deps = [];
+            strip(content)
+                .split('\n')
+                .filter(line => line.indexOf('require') > -1 || line.indexOf('import') > -1)
+                .forEach(function(line) {
+                    for (let reg of regs) {
+                        let match = line.match(reg); 
+                        if (match && match[1]) {
+                            if (builtin.indexOf(match[1]) > -1) {
+                                !ignoreBuiltin && deps.push(match[1]);
+                            } else {
+                                let name = resolve(filepath, match[1]);
+                                if (!fs.existsSync(name)) {
+                                    throw new Error(name + ' not exist when processing ' + filepath + ' and requring ' + match[1]);
+                                }
+                                if (status[name]) return; // cyclic, and ignore
+                                status[name] = true;
+                                if (!cache[name]) cache[name] = _get(fs.readFileSync(name, 'utf-8'), name);
+                                deps.push.apply(deps, cache[name].concat(name));
                             }
-                            if (status[name]) return; // cyclic, and ignore
-                            status[name] = true;
-                            deps.push.apply(deps, _get(fs.readFileSync(name, 'utf-8'), name).concat(name));
                         }
                     }
-                }
-            });
-        return deps;
+                });
+            return deps;
+        }
+        content = content || fs.readFileSync(filepath, 'utf-8');
+        return _get(content, filepath);
     }
-    content = content || fs.readFileSync(filepath, 'utf-8');
-    return _get(content, filepath);
 }
-module.exports = getDeps;
