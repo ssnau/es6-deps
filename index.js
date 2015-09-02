@@ -109,12 +109,12 @@ var _default = (function () {
 
                             var match = line.match(reg);
                             if (match && match[1]) {
-                                if (ignorePattern.test(match[1])) return;
                                 if (builtin.indexOf(match[1]) > -1) {
                                     !ignoreBuiltin && deps.push(match[1]);
                                 } else {
                                     try {
                                         var _name = resolve(filepath, match[1]);
+                                        if (ignorePattern.test(_name)) return;
                                         if (!fs.existsSync(_name)) {
                                             throw new Error(_name + ' not exist when processing ' + filepath + ' and requring ' + match[1]);
                                         }
