@@ -1,6 +1,6 @@
 require('babel/register');
 var assert = require('assert');
-var Dep = require('../');
+var Dep = require('../src');
 var file = function (name) {
   return __dirname + "/files/" + name;
 }

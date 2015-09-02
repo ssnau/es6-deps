@@ -19,6 +19,16 @@ var regs = [/import\s+.*"([^"]+)"/, /import\s+.*'([^']+)'/, /require\s*\("([^"]*
 
 var cache = {};
 
+function suffix_path(p) {
+    var pt;
+    var _arr = ['', '.js', '.jsx', '.es6'];
+    for (var _i = 0; _i < _arr.length; _i++) {
+        var suffix = _arr[_i];
+        var pt = p + suffix;
+        if (fs.existsSync(pt)) return pt;
+    }
+}
+
 function _resolve(current, relpath) {
     var dirname = path.dirname(current);
     if (relpath.charAt(0) === '/') return relpath;
@@ -28,30 +38,26 @@ function _resolve(current, relpath) {
     var nmdir;
     while (parts.length) {
         var p = parts.join('/');
-        if (fs.existsSync(path.join(p, 'node_modules'))) {
-            nmdir = path.join(p, 'node_modules');
-            break;
+        var temp = suffix_path(path.join(p, 'node_modules', relpath));
+        if (temp) {
+            if (!isdir(temp)) return temp;else {
+                nmdir = temp;
+                break;
+            }
         }
         parts.pop();
     }
-    if (!nmdir) throw new Error('cannot find node_modules from ', current, ' when requiring ', relpath);
 
-    var file = path.join(nmdir, relpath);
-    if (!isdir(file)) return file;
-    var pkg = require(path.join(file, 'package.json'));
+    if (!nmdir) throw new Error('cannot parse ' + relpath + ' when processing ' + current);
+    var pkg = require(path.join(nmdir, 'package.json'));
     var main = pkg.main || "index";
-    return path.join(file, main);
+    return path.join(nmdir, main);
 }
 
 function resolve(current, filepath) {
     var p = _resolve(current, filepath);
-    var pt;
-    var _arr = ['', '.js', '.jsx', '.es6'];
-    for (var _i = 0; _i < _arr.length; _i++) {
-        var suffix = _arr[_i];
-        var pt = p + suffix;
-        if (fs.existsSync(pt)) return pt;
-    }
+    var pt = suffix_path(p);
+    if (pt) return pt;
     throw new Error(p + " not exist when processing " + current + " and requiring " + filepath);
 }
 
