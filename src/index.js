@@ -76,6 +76,8 @@ export default class {
     getDeps(filepath, content, opt) {
         opt = opt || {};
         const ignoreBuiltin = opt.ignoreBuiltin;
+        const supressNotFound = opt.supressNotFound;
+        const ignorePattern = opt.ignorePattern || /^\s+$/;
         var status = {};
         var cache = this.cache;
         status[filepath] = true;
@@ -89,17 +91,23 @@ export default class {
                     for (let reg of regs) {
                         let match = line.match(reg); 
                         if (match && match[1]) {
+                            if (ignorePattern.test(match[1])) return;
                             if (builtin.indexOf(match[1]) > -1) {
                                 !ignoreBuiltin && deps.push(match[1]);
                             } else {
-                                let name = resolve(filepath, match[1]);
-                                if (!fs.existsSync(name)) {
-                                    throw new Error(name + ' not exist when processing ' + filepath + ' and requring ' + match[1]);
+                                try {
+                                    let name = resolve(filepath, match[1]);
+                                    if (!fs.existsSync(name)) {
+                                        throw new Error(name + ' not exist when processing ' + filepath + ' and requring ' + match[1]);
+                                    }
+                                    if (status[name]) return; // cyclic, and ignore
+                                    status[name] = true;
+                                    if (!cache[name]) cache[name] = _get(fs.readFileSync(name, 'utf-8'), name);
+                                    deps.push.apply(deps, cache[name].concat(name));
+                                } catch (e) {
+                                    if (supressNotFound) return;
+                                    throw e;
                                 }
-                                if (status[name]) return; // cyclic, and ignore
-                                status[name] = true;
-                                if (!cache[name]) cache[name] = _get(fs.readFileSync(name, 'utf-8'), name);
-                                deps.push.apply(deps, cache[name].concat(name));
                             }
                         }
                     }
