@@ -24,25 +24,25 @@ function suffix_path(p) {
 
 function _resolve(current, relpath) {
     var dirname = path.dirname(current);
-    if (relpath.charAt(0) === '/') return relpath;
-    if (relpath.charAt(0) === '.') return path.join(dirname, relpath);
-    // find node_modules dir
-    var parts = dirname.split('/');
     var nmdir;
-    while (parts.length) {
-        var p = parts.join('/');
-        var temp = suffix_path(path.join(p, 'node_modules', relpath));
-        if (temp) {
-            if (!isdir(temp)) return temp;
-            else {
-                nmdir = temp;
+    if (relpath.charAt(0) === '/') nmdir = relpath;
+    if (relpath.charAt(0) === '.') nmdir = path.join(dirname, relpath);
+
+    // find node_modules dir
+    if (!nmdir) {
+        var parts = dirname.split('/');
+        while (parts.length) {
+            var p = parts.join('/');
+            var nmdir = suffix_path(path.join(p, 'node_modules', relpath));
+            if (nmdir) {
                 break;
             }
+            parts.pop(); 
         }
-        parts.pop(); 
     }
 
     if (!nmdir) throw new Error('cannot parse ' + relpath + ' when processing ' + current);
+    if (!isdir(nmdir)) return nmdir;
     var pkg = require(path.join(nmdir, 'package.json'));
     var main = pkg.main || "index";
     return path.join(nmdir, main);
