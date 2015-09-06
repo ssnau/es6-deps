@@ -21,10 +21,10 @@ var b = require('b')
 another is `b.js` whose content is empty. Below is how we get the dependencies list of `a.js`:
 
 ```
-var deps = require('es6-deps');
-deps(__dirname + "/a.js", function (err, dependencies) {
-  console.log(dependencies); // get ['{__dirname}/b.js', '{__dirname}/a.js']
-});
+var Deps = require('es6-deps');
+var analyzer = new Deps();
+var deps = analyzer.getDeps(__dirname + "/a.js");
+console.log(deps); // ['{__dirname}/b.js', '{__dirname}/a.js']
 ```
 
 License
