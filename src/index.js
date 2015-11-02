@@ -2,6 +2,7 @@ var isdir = require('isdir');
 var fs = require('fs');
 var path = require('path');
 var strip = require('strip-comments');
+var resolve = require('resolve');
 
 var builtin = require('builtin-modules');
 
@@ -30,47 +31,19 @@ function safe(fn) {
     }
 }
 
-function _resolve(current, relpath) {
-    var dirname = path.dirname(current);
-    var nmdir;
-    if (relpath.charAt(0) === '/') nmdir = relpath;
-    if (relpath.charAt(0) === '.') nmdir = path.join(dirname, relpath);
-
-    // find node_modules dir
-    if (!nmdir) {
-        var parts = dirname.split('/');
-        while (parts.length) {
-            var p = parts.join('/');
-            var nmdir = suffix_path(path.join(p, 'node_modules', relpath));
-            if (nmdir) {
-                break;
-            }
-            parts.pop(); 
-        }
-    }
-
-    if (!nmdir) throw new Error('cannot parse ' + relpath + ' when processing ' + current);
-    if (!isdir(nmdir)) return nmdir;
-    var pkg = {};
-    safe(__ => pkg = require(path.join(nmdir, 'package.json')));
-    var main = pkg.main || "index";
-    return path.join(nmdir, main);
-}
-
-function resolve(current, filepath) {
-    var p = _resolve(current, filepath);
-    var pt = suffix_path(p);
-    if (pt) return pt;
-    throw new Error(p + " not exist when processing " + current + " and requiring " + filepath);
-}
-
 export default class {
-    constructor() {
+    constructor(opt) {
         this.cache = {};
+        this.opt = opt || {};
     }
 
     clearCache() {
         this.cache = {};
+    }
+
+    resolve(source, option) {
+        if (this.opt.resolve) return this.opt.resolve(source, option);
+        return resolve.sync(source, option);
     }
 
     getDeps(filepath, content, opt) {
@@ -80,6 +53,7 @@ export default class {
         const ignorePattern = opt.ignorePattern || /^\s+$/;
         var status = {};
         var cache = this.cache;
+        var self = this;
         status[filepath] = true;
 
         function _get(content, filepath) {
@@ -95,7 +69,8 @@ export default class {
                                 !ignoreBuiltin && deps.push(match[1]);
                             } else {
                                 try {
-                                    let name = resolve(filepath, match[1]);
+                                    let name = self.resolve(match[1], {basedir: path.dirname(filepath), extensions: ['.js', '.jsx', '.es6']});
+
                                     if (ignorePattern.test(name)) return;
                                     if (!fs.existsSync(name)) {
                                         throw new Error(name + ' not exist when processing ' + filepath + ' and requring ' + match[1]);

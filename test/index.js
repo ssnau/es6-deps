@@ -39,4 +39,13 @@ describe('should get deps', function () {
       });
   });
 
+  it('custom resolve', function () {
+    var dep = new Dep({
+        resolve: function (source, opt) {
+            return require('resolve').sync(source.replace('@app', __dirname), opt);
+        }
+    });
+    var data = dep.getDeps(file('alias.js'));
+    assert.ok(data.indexOf(file('b.js')) > -1)
+  });
 });

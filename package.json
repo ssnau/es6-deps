@@ -9,6 +9,7 @@
   "dependencies": {
     "builtin-modules": "^1.1.0",
     "isdir": "^2.0.1",
+    "resolve": "^1.1.6",
     "strip-comments": "^0.3.2"
   },
   "devDependencies": {
