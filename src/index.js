@@ -30,7 +30,18 @@ function safe(fn) {
 
     }
 }
-
+/*
+ * 消除所有带*的字符串,保证不会因为*而破坏strip-comments
+ */
+function rm_star(str) {
+  return str.split('\n')
+    .map(line => {
+      return line
+        .replace(/'[^']+\*[^']*'/g, "''")
+        .replace(/"[^"]+\*[^"]*"/g, '""')
+    })
+    .join('\n');
+}
 export default class {
     constructor(opt) {
         this.cache = {};
@@ -58,7 +69,7 @@ export default class {
 
         function _get(content, filepath) {
             var deps = [];
-            strip(content)
+            strip(rm_star(content))
                 .split('\n')
                 .filter(line => line.indexOf('require') > -1 || line.indexOf('import') > -1)
                 .forEach(function(line) {
