@@ -33,6 +33,13 @@ describe('should get deps', function () {
     ], data);
   });
 
+  it('import b - multiline', function () {
+    var data = deps(file('i-b2.js'));
+    assert.equal(data.length, 1);
+    assert.deepEqual([
+      file('b.js'),
+    ], data);
+  });
   it('parse error', function () {
       assert.throws(function(){
         var data = deps(file('error.js'));

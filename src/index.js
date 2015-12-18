@@ -7,8 +7,8 @@ var resolve = require('resolve');
 var builtin = require('builtin-modules');
 
 var regs = [
-    /import\s+.*"([^"]+)"/,
-    /import\s+.*'([^']+)'/,
+    /from\s+.*"([^"]+)"/,
+    /from\s+.*'([^']+)'/,
     /require\s*\("([^"]*)"\)/,
     /require\s*\('([^']*)'\)/,
 ];
@@ -71,7 +71,7 @@ export default class {
             var deps = [];
             strip(rm_star(content))
                 .split('\n')
-                .filter(line => line.indexOf('require') > -1 || line.indexOf('import') > -1)
+                .filter(line => line.indexOf('require') > -1 || line.indexOf('from') > -1 ||  line.indexOf('import') > -1)
                 .forEach(function(line) {
                     for (let reg of regs) {
                         let match = line.match(reg); 

@@ -16,7 +16,7 @@ var _resolve = require('resolve');
 
 var builtin = require('builtin-modules');
 
-var regs = [/import\s+.*"([^"]+)"/, /import\s+.*'([^']+)'/, /require\s*\("([^"]*)"\)/, /require\s*\('([^']*)'\)/];
+var regs = [/from\s+.*"([^"]+)"/, /from\s+.*'([^']+)'/, /require\s*\("([^"]*)"\)/, /require\s*\('([^']*)'\)/];
 
 var cache = {};
 
@@ -78,7 +78,7 @@ var _default = (function () {
             function _get(content, filepath) {
                 var deps = [];
                 strip(rm_star(content)).split('\n').filter(function (line) {
-                    return line.indexOf('require') > -1 || line.indexOf('import') > -1;
+                    return line.indexOf('require') > -1 || line.indexOf('from') > -1 || line.indexOf('import') > -1;
                 }).forEach(function (line) {
                     var _iteratorNormalCompletion = true;
                     var _didIteratorError = false;
