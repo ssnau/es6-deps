@@ -40,7 +40,7 @@ function safe(fn) {
  */
 function rm_star(str) {
     return str.split('\n').map(function (line) {
-        return line.replace(/'[^']+\*[^']*'/g, "''").replace(/"[^"]+\*[^"]*"/g, '""');
+        return line.replace(/'[^']+\*[^']*'/g, "''").replace(/"[^"]+\*[^"]*"/g, '""').replace(/\/\*+\//, '');
     }).join('\n');
 }
 
