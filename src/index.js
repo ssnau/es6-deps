@@ -39,6 +39,7 @@ function rm_star(str) {
       return line
         .replace(/'[^']+\*[^']*'/g, "''")
         .replace(/"[^"]+\*[^"]*"/g, '""')
+        .replace(/\/\*+\//, '')
     })
     .join('\n');
 }
