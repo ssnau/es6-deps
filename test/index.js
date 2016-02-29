@@ -62,4 +62,15 @@ describe('should get deps', function () {
     assert.ok(data.indexOf(file('cylic3.js')) > -1)
     assert.ok(data.length === 2);
   });
+
+  it('cache not collide', function () {
+    var dep = new Dep();
+    var dataA = dep.getDeps(file('collide/a.js'));
+    var dataB = dep.getDeps(file('collide/b.js'));
+    assert.deepEqual(dataA.sort(), [
+      file('collide/c.js'),
+      file('collide/d.js'),
+    ].sort());
+    assert.deepEqual(dataA.sort(), dataB.sort());
+  });
 });
