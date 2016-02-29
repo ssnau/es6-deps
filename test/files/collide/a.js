@@ -1,1 +1,2 @@
+require('./d');
 require('./c');
