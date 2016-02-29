@@ -70,10 +70,9 @@ var _default = (function () {
             var ignoreBuiltin = opt.ignoreBuiltin;
             var supressNotFound = opt.supressNotFound;
             var ignorePattern = opt.ignorePattern || /^\s+$/;
-            var status = {};
             var cache = this.cache;
             var self = this;
-            status[filepath] = true;
+            var stack = [];
 
             function _get(content, filepath) {
                 var deps = [];
@@ -100,9 +99,17 @@ var _default = (function () {
                                         if (!fs.existsSync(_name)) {
                                             throw new Error(_name + ' not exist when processing ' + filepath + ' and requring ' + match[1]);
                                         }
-                                        if (status[_name]) return; // cyclic, and ignore
-                                        status[_name] = true;
-                                        if (!cache[_name]) cache[_name] = _get(fs.readFileSync(_name, 'utf-8'), _name);
+                                        if (stack.indexOf(_name) > -1) {
+                                            //console.log('found pontential cyclic error! @', stack.indexOf(name) ,stack.concat(name).join(' -> '));
+                                            return; // cyclic, and ignore
+                                        }
+                                        stack.push(_name);
+                                        try {
+                                            if (!cache[_name]) cache[_name] = _get(fs.readFileSync(_name, 'utf-8'), _name);
+                                        } catch (e) {
+                                            // do nothing
+                                        }
+                                        stack.pop(_name);
                                         deps.push.apply(deps, cache[_name].concat(_name));
                                     } catch (e) {
                                         if (supressNotFound) return;
@@ -129,7 +136,11 @@ var _default = (function () {
                 return deps;
             }
             content = content || fs.readFileSync(filepath, 'utf-8');
-            return _get(content, filepath);
+            stack.push(filepath);
+            var deps = _get(content, filepath);
+            return deps.filter(function (dep, i) {
+                return deps.indexOf(dep) === i;
+            });
         }
     }]);
 

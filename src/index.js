@@ -63,10 +63,9 @@ export default class {
         const ignoreBuiltin = opt.ignoreBuiltin;
         const supressNotFound = opt.supressNotFound;
         const ignorePattern = opt.ignorePattern || /^\s+$/;
-        var status = {};
         var cache = this.cache;
         var self = this;
-        status[filepath] = true;
+        var stack = [];
 
         function _get(content, filepath) {
             var deps = [];
@@ -87,9 +86,17 @@ export default class {
                                     if (!fs.existsSync(name)) {
                                         throw new Error(name + ' not exist when processing ' + filepath + ' and requring ' + match[1]);
                                     }
-                                    if (status[name]) return; // cyclic, and ignore
-                                    status[name] = true;
-                                    if (!cache[name]) cache[name] = _get(fs.readFileSync(name, 'utf-8'), name);
+                                    if (stack.indexOf(name) > -1) {
+                                      //console.log('found pontential cyclic error! @', stack.indexOf(name) ,stack.concat(name).join(' -> '));
+                                      return; // cyclic, and ignore
+                                    }
+                                    stack.push(name);
+                                    try {
+                                      if (!cache[name]) cache[name] = _get(fs.readFileSync(name, 'utf-8'), name);
+                                    } catch (e) {
+                                      // do nothing
+                                    }
+                                    stack.pop(name);
                                     deps.push.apply(deps, cache[name].concat(name));
                                 } catch (e) {
                                     if (supressNotFound) return;
@@ -102,6 +109,8 @@ export default class {
             return deps;
         }
         content = content || fs.readFileSync(filepath, 'utf-8');
-        return _get(content, filepath);
+        stack.push(filepath);
+        var deps = _get(content, filepath);
+        return deps.filter((dep, i) => deps.indexOf(dep) === i);
     }
 }

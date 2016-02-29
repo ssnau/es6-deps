@@ -55,4 +55,11 @@ describe('should get deps', function () {
     var data = dep.getDeps(file('alias.js'));
     assert.ok(data.indexOf(file('b.js')) > -1)
   });
+
+  it('cylic', function () {
+    var data = dep.getDeps(file('cylic.js'));
+    assert.ok(data.indexOf(file('cylic2.js')) > -1)
+    assert.ok(data.indexOf(file('cylic3.js')) > -1)
+    assert.ok(data.length === 2);
+  });
 });
