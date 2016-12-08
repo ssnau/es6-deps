@@ -39,7 +39,8 @@ function rm_star(str) {
       return line
         .replace(/'[^']+\*[^']*'/g, "''")
         .replace(/"[^"]+\*[^"]*"/g, '""')
-        .replace(/\/\*+\//, '')
+        // .replace(/\/\*+\//, '')
+        .replace(/\/\S*\*+\S*\/[a-z]/g, '')
     })
     .join('\n');
 }
@@ -74,7 +75,7 @@ export default class {
                 .filter(line => line.indexOf('require') > -1 || line.indexOf('from') > -1 ||  line.indexOf('import') > -1)
                 .forEach(function(line) {
                     for (let reg of regs) {
-                        let match = line.match(reg); 
+                        let match = line.match(reg);
                         if (match && match[1]) {
                             if (builtin.indexOf(match[1]) > -1) {
                                 !ignoreBuiltin && deps.push(match[1]);
@@ -97,7 +98,9 @@ export default class {
                                       // do nothing
                                     }
                                     stack.pop(name);
-                                    deps.push.apply(deps, cache[name].concat(name));
+                                    if (cache[name]) {
+                                      deps.push.apply(deps, cache[name].concat(name));
+                                    }
                                 } catch (e) {
                                     if (supressNotFound) return;
                                     throw e;

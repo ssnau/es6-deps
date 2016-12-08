@@ -40,7 +40,9 @@ function safe(fn) {
  */
 function rm_star(str) {
     return str.split('\n').map(function (line) {
-        return line.replace(/'[^']+\*[^']*'/g, "''").replace(/"[^"]+\*[^"]*"/g, '""').replace(/\/\*+\//, '');
+        return line.replace(/'[^']+\*[^']*'/g, "''").replace(/"[^"]+\*[^"]*"/g, '""')
+        // .replace(/\/\*+\//, '')
+        .replace(/\/\S*\*+\S*\/[a-z]/g, '');
     }).join('\n');
 }
 
@@ -110,7 +112,9 @@ var _default = (function () {
                                             // do nothing
                                         }
                                         stack.pop(_name);
-                                        deps.push.apply(deps, cache[_name].concat(_name));
+                                        if (cache[_name]) {
+                                            deps.push.apply(deps, cache[_name].concat(_name));
+                                        }
                                     } catch (e) {
                                         if (supressNotFound) return;
                                         throw e;
