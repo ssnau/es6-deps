@@ -42,7 +42,7 @@ function rm_star(str) {
     return str.split('\n').map(function (line) {
         return line.replace(/'[^']+\*[^']*'/g, "''").replace(/"[^"]+\*[^"]*"/g, '""')
         // .replace(/\/\*+\//, '')
-        .replace(/\/\S*\*+\S*\/[a-z]/g, '');
+        .replace(/\/\S*\*+\S*\/[a-z]*/g, '');
     }).join('\n');
 }
 

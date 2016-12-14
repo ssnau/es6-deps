@@ -40,7 +40,7 @@ function rm_star(str) {
         .replace(/'[^']+\*[^']*'/g, "''")
         .replace(/"[^"]+\*[^"]*"/g, '""')
         // .replace(/\/\*+\//, '')
-        .replace(/\/\S*\*+\S*\/[a-z]/g, '')
+        .replace(/\/\S*\*+\S*\/[a-z]*/g, '')
     })
     .join('\n');
 }
