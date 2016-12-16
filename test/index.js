@@ -8,15 +8,25 @@ var dep = new Dep();
 var deps = dep.getDeps.bind(dep);
 
 describe('should get deps', function () {
-   before(function() {
-        dep.clearCache();
-   });
+  before(function() {
+      dep.clearCache();
+  });
 
   it('basic', function() {
     var data = deps(file('simple.js'));
     assert.ok(Array.isArray(data));
     assert.ok(data.length > 3);
   });
+
+  it('complex deps', function () {
+    var data = deps(file('complex.js'));
+    assert.ok(data.length === 4);
+  })
+
+  it('comment deps', function () {
+    var data = deps(file('comment.js'));
+    assert.ok(data.length === 0);
+  })
 
   it('require b', function () {
     var data = deps(file('r-b.js'));

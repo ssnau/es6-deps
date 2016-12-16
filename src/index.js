@@ -1,7 +1,6 @@
 var isdir = require('isdir');
 var fs = require('fs');
 var path = require('path');
-var strip = require('strip-comments');
 var resolve = require('resolve');
 
 var builtin = require('builtin-modules');
@@ -30,20 +29,30 @@ function safe(fn) {
 
     }
 }
+
 /*
- * 消除所有带*的字符串,保证不会因为*而破坏strip-comments
+ * remove star and comments
  */
-function rm_star(str) {
-  return str.split('\n')
-    .map(line => {
-      return line
+function removeStarAndComments(str) {
+  var text = str.split('\n')
+    .map(function (line) {
+      line = line
         .replace(/'[^']+\*[^']*'/g, "''")
         .replace(/"[^"]+\*[^"]*"/g, '""')
-        // .replace(/\/\*+\//, '')
-        .replace(/\/\S*\*+\S*\/[a-z]*/g, '')
+        // remove line comment
+        .replace(/^\/\/.*$/gm, '')
+        .replace(/(?:[^\\])\/\/.*$/gm, '')
+      return line
     })
     .join('\n');
+  // remove block comment
+  text = text
+    .replace(/^\/\*[\S\s]*?\*\//g, '')
+    .replace(/(?:[^\\])\/\*[\S\s]*?\*\//g, '')
+  console.log(text)
+  return text
 }
+
 export default class {
     constructor(opt) {
         this.cache = {};
@@ -70,7 +79,7 @@ export default class {
 
         function _get(content, filepath) {
             var deps = [];
-            strip(rm_star(content))
+            removeStarAndComments(content)
                 .split('\n')
                 .filter(line => line.indexOf('require') > -1 || line.indexOf('from') > -1 ||  line.indexOf('import') > -1)
                 .forEach(function(line) {
