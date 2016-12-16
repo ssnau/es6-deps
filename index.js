@@ -47,7 +47,6 @@ function removeStarAndComments(str) {
     }).join('\n');
     // remove block comment
     text = text.replace(/^\/\*[\S\s]*?\*\//g, '').replace(/(?:[^\\])\/\*[\S\s]*?\*\//g, '');
-    console.log(text);
     return text;
 }
 

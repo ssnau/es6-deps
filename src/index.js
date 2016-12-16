@@ -49,7 +49,6 @@ function removeStarAndComments(str) {
   text = text
     .replace(/^\/\*[\S\s]*?\*\//g, '')
     .replace(/(?:[^\\])\/\*[\S\s]*?\*\//g, '')
-  console.log(text)
   return text
 }
 
