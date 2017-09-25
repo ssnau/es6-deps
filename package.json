@@ -1,28 +1,25 @@
 {
   "name": "es6-deps",
-  "version": "1.1.10",
+  "version": "1.2.0",
   "description": "a simple util to get es6/jsx dependencies",
   "main": "index.js",
   "directories": {
-    "test": "mocha"
+    "test": "test"
   },
   "dependencies": {
-    "builtin-modules": "^1.1.0",
-    "isdir": "^2.0.1",
+    "builtin-modules": "latest",
     "resolve": "^1.1.6"
   },
   "devDependencies": {
-    "babel": "^5.8.23",
     "mocha": "^2.2.5",
     "through2": "^2.0.0"
   },
   "scripts": {
-    "test": "mocha",
-    "build": "babel src/index.js --out-file index.js"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ssnau/es6-deps.git"
+    "url": "git+https://github.com/ssnau/es6-deps.git"
   },
   "keywords": [
     "es6",
@@ -30,6 +27,9 @@
     "deps",
     "dependencies"
   ],
+  "engines": {
+    "node": ">=8.x"
+  },
   "author": "ssnau",
   "license": "MIT",
   "bugs": {
