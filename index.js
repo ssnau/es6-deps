@@ -17,24 +17,6 @@ var builtin = require('builtin-modules');
 
 var regs = [/from\s+.*"([^"]+)"/, /from\s+.*'([^']+)'/, /require\s*\("([^"]*)"\)/, /require\s*\('([^']*)'\)/];
 
-var cache = {};
-
-function suffix_path(p) {
-    var pt;
-    var _arr = ['', '.js', '.jsx', '.es6'];
-    for (var _i = 0; _i < _arr.length; _i++) {
-        var suffix = _arr[_i];
-        var pt = p + suffix;
-        if (fs.existsSync(pt)) return pt;
-    }
-}
-
-function safe(fn) {
-    try {
-        fn();
-    } catch (e) {}
-}
-
 /*
  * remove star and comments
  */
@@ -94,36 +76,35 @@ var _default = (function () {
                             var reg = _step.value;
 
                             var match = line.match(reg);
-                            if (match && match[1]) {
-                                if (builtin.indexOf(match[1]) > -1) {
-                                    !ignoreBuiltin && deps.push(match[1]);
-                                } else {
-                                    try {
-                                        var _name = self.resolve(match[1], { basedir: path.dirname(filepath), extensions: ['.js', '.jsx', '.es6'] });
-
-                                        if (ignorePattern.test(_name)) return;
-                                        if (!fs.existsSync(_name)) {
-                                            throw new Error(_name + ' not exist when processing ' + filepath + ' and requring ' + match[1]);
-                                        }
-                                        if (stack.indexOf(_name) > -1) {
-                                            //console.log('found pontential cyclic error! @', stack.indexOf(name) ,stack.concat(name).join(' -> '));
-                                            return; // cyclic, and ignore
-                                        }
-                                        stack.push(_name);
-                                        try {
-                                            if (!cache[_name]) cache[_name] = _get(fs.readFileSync(_name, 'utf-8'), _name);
-                                        } catch (e) {
-                                            // do nothing
-                                        }
-                                        stack.pop(_name);
-                                        if (cache[_name]) {
-                                            deps.push.apply(deps, cache[_name].concat(_name));
-                                        }
-                                    } catch (e) {
-                                        if (supressNotFound) return;
-                                        throw e;
-                                    }
+                            if (!match) continue;
+                            if (!match[1]) continue;
+                            if (builtin.indexOf(match[1]) > -1) {
+                                !ignoreBuiltin && deps.push(match[1]);
+                                continue;
+                            }
+                            try {
+                                var _name = self.resolve(match[1], { basedir: path.dirname(filepath), extensions: ['.js', '.jsx', '.es6', 'ts', '.tsx'] });
+                                if (ignorePattern.test(_name)) return;
+                                if (!fs.existsSync(_name)) {
+                                    throw new Error(_name + ' not exist when processing ' + filepath + ' and requring ' + match[1]);
                                 }
+                                if (stack.indexOf(_name) > -1) {
+                                    //console.log('found pontential cyclic error! @', stack.indexOf(name) ,stack.concat(name).join(' -> '));
+                                    return; // cyclic, and ignore
+                                }
+                                stack.push(_name);
+                                try {
+                                    if (!cache[_name]) cache[_name] = _get(fs.readFileSync(_name, 'utf-8'), _name);
+                                } catch (e) {
+                                    // do nothing
+                                }
+                                stack.pop(_name);
+                                if (cache[_name]) {
+                                    deps.push.apply(deps, cache[_name].concat(_name));
+                                }
+                            } catch (e) {
+                                if (supressNotFound) return;
+                                throw e;
                             }
                         }
                     } catch (err) {
