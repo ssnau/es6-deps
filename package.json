@@ -7,9 +7,9 @@
     "test": "mocha"
   },
   "dependencies": {
-    "builtin-modules": "^1.1.0",
+    "builtin-modules": "^3.1.0",
     "isdir": "^2.0.1",
-    "resolve": "^1.1.6"
+    "resolve": "^1.17.0"
   },
   "devDependencies": {
     "babel": "^5.8.23",
