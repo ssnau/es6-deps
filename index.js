@@ -83,7 +83,7 @@ var _default = (function () {
                                 continue;
                             }
                             try {
-                                var _name = self.resolve(match[1], { basedir: path.dirname(filepath), extensions: ['.js', '.jsx', '.es6', 'ts', '.tsx'] });
+                                var _name = self.resolve(match[1], { basedir: path.dirname(filepath), extensions: ['.js', '.jsx', '.es6', '.ts', '.tsx'] });
                                 if (ignorePattern.test(_name)) return;
                                 if (!fs.existsSync(_name)) {
                                     throw new Error(_name + ' not exist when processing ' + filepath + ' and requring ' + match[1]);
