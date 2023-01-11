@@ -12,8 +12,8 @@
     "resolve": "^1.17.0"
   },
   "devDependencies": {
-    "babel": "^5.8.23",
-    "mocha": "^2.2.5",
+    "babel": "^6.23.0",
+    "mocha": "^10.2.0",
     "through2": "^2.0.0"
   },
   "scripts": {
